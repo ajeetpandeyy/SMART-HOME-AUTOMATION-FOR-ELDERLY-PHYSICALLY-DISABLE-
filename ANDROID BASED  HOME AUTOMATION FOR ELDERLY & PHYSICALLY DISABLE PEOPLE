@@ -1,0 +1,111 @@
+//ANDROID BASED  HOME AUTOMATION FOR ELDERLY & PHYSICALLY DISABLE PEOPLE
+
+
+#define BAUD 9600 
+#define MYUBRR FOSC/16/BAUD-1 
+
+void USART_Init( unsigned int ubrr) 
+{                                                 /*Set baud rate */   
+  UBRR0H = (unsigned char)(ubrr>>8);  
+ UBRR0L = (unsigned char)ubrr;   
+
+UCSR0B = (1<<RXEN0)|(1<<TXEN0);                   /* Set frame format: 8 data, 2 stop bit */
+}
+
+void USART_Transmit( unsigned char data ) 
+{                                                 /* Wait for empty transmit buffer */   
+  while ( !( UCSR0A & (1<<UDRE0)) );   
+                                                  /* Put data into buffer, sends the data */   
+  UDR0 = data; 
+}
+unsigned char USART_Receive( void )
+{                                                  /* Wait for data to be received */   
+  while ( !(UCSR0A & (1<<RXC0)) )      ;  
+                                                 /* Get and return received data from buffer */  
+  return UDR0; }
+  
+int main()
+{
+  
+  char t='a';
+   USART_Init(9600);
+  USART_Transmit(t);
+  t=USART_Receive();
+return 0;
+}
+
+
+#include <SoftwareSerial.h>
+
+const int rxPin = 0;
+const int txPin = 1;               
+
+SoftwareSerial mySerial(rxPin, txPin);
+
+const int Loads[] = { 8, 9, 10, 11};
+
+
+
+int state = 0; 
+int flag = 0;
+
+void setup() 
+{
+   for (int i=0;i<4;i++)
+    {
+      pinMode(Loads[i], OUTPUT);
+    }
+   mySerial.begin(9600);
+   for (int i=0;i<4;i++)
+    {
+      digitalWrite(Loads[i], HIGH);
+    }
+   
+}
+   
+void loop() 
+{
+    
+    if(mySerial.available() > 0)
+    {
+      state = mySerial.read();
+      flag=0;
+    }
+    
+    switch(state)
+    {
+      case '0':digitalWrite(Loads[0], LOW);
+               flag=1;
+               break;
+      case '1':digitalWrite(Loads[0], HIGH);
+               flag=1;
+               break;
+      case '2':digitalWrite(Loads[1],LOW);
+               flag=1;
+               break;
+      case '3':digitalWrite(Loads[1], HIGH);
+               flag=1;
+               break;
+      case '4':digitalWrite(Loads[2], LOW);
+               flag=1;
+               break;
+      case '5':digitalWrite(Loads[2], HIGH);
+               flag=1;
+               break;
+      case '6':digitalWrite(Loads[3], LOW);
+               flag=1;
+               break;
+      case '7':digitalWrite(Loads[3], HIGH);
+               flag=1;
+               break;
+      case '9':digitalWrite(Loads[0], HIGH);
+               digitalWrite(Loads[1], HIGH);
+               digitalWrite(Loads[2], HIGH);
+               digitalWrite(Loads[3], HIGH);
+               flag=1;
+               break;
+
+  
+     
+     }
+}
